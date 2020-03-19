@@ -1,3 +1,3 @@
 # NutNetLitterDecomp
 Code associated with long term oak litter decomposition experiment across Nutrient Network sites
-Practice edit here
+This project organizes data files and code associated with a seven year oak (*Quercus ellipsoidalis*) leaf litter decomposition across Nutrient Network sites in North America, Australia, and Europe. Information about the Nutrient Network experiment can be found [here](https://nutnet.org/).
