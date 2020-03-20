@@ -190,3 +190,4 @@ colnames(ParameterSummary)<-c("single.k", "double.ks", "double.k","double.A", "a
 #Export data
 write.csv(a.aicc, "a.aicc_table.csv")
 write.csv(k_vals, "20190801_k_vals_table.csv")
+
