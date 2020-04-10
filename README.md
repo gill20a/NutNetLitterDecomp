@@ -19,6 +19,6 @@ The code and datasets provided here allow you to:
 2. **Evaluate Treatment Responses**. Evaluate effect of fertilization treatments on model decomposition model parameters. 
  - **Data**: 
  - **Metadata**: 
- - **Code**: 
+ - **Code**: NutNetOakLitter_TreatmentResponses.R
  
 The first line of each code file needs to be updated to match the data directory on the user's computer.  This project was built under R version3.6.1 and depends on the following packages: stats4, bbmle, readr, plyr, dplyr, Matrix, Hmisc, gglplot2, nlme, multcomp, MuMIn, boot.
