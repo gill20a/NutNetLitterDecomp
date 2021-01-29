@@ -1,5 +1,5 @@
 # NutNetLitterDecomp
-This project organizes data files and code associated with a seven year oak (*Quercus ellipsoidalis*) leaf litter decomposition across Nutrient Network sites in North America, Australia, and Europe. Information about the Nutrient Network experiment can be found [here](https://nutnet.org/). 
+This project organizes data files and code associated with a seven year oak (*Quercus ellipsoidalis*) leaf litter decomposition across Nutrient Network sites in North America, Australia, and Europe. Information about the Nutrient Network experiment can be found [here](https://nutnet.org/). Results from the N x P x K fertilization experiment are reported in Hobbie, Gill, et al. XXXXX. 
 
 ## Methods associated with litter decomposition experiment
 Freshly fallen leaf litter (*Quercus ellipsoidalis*) was collected at Cedar Creek Ecosystem Science Researve (45.4020 °N, 93.1994 °W) in October 2008. Litter bags were constructed of 1-mm mesh fiberglass window screen and contained approximately 10 g (dry weight) of autoclave-steriled leaf litter. Bags were strung together in groups of seven to allow for seven annual harvests and sent to individual Nutrient Network site investigators. Site investigators deployed litterbags by pinning a single string to the ground in each experimental plot between December 2009 and October 2010. Here we evaluate the effect of factorial fertilization treatments on litter decomposition dynamics.
@@ -11,7 +11,9 @@ The code and datasets provided here allow you to:
 
  - **Data**: NutNet_OakLitterDecay_HarvestData.csv
  - **Metadata**: NutNet_OakLitter_Decomp_Metadata.csv
- - **Code**: DecompModelFitting_SiteTrt.R
+ - **Code**: DecompModelFitting_SiteTrt.R (fit models by site x treatment combinations)
+ - **Code**: SiteTrt_ModelFitAnalysis.R (evaluate model fits, generate data in Hobbie, Gill, et al. Tables S3 & S4).
+ - **Code**: DecompModelFitting_Plots.R (fit models by individual plots)
  
  Single exponential, asymptotic exponential, and Weibull decomposition models were then fit to decomposition series within individual plots.
  - **Code**: DecompModelFitting_Plot.R
