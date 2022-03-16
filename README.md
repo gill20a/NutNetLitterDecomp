@@ -18,7 +18,7 @@ The code and datasets provided here allow you to:
  Single exponential, asymptotic exponential, and Weibull decomposition models were then fit to decomposition series within individual plots.
  - **Code**: DecompModelFitting_Plot.R
  
-2. **Evaluate Treatment Responses**. Evaluate effect of N*P*K fertilization treatments on model decomposition model parameters. 
+2. **Evaluate Treatment Responses**. Evaluate effect of NxPxK fertilization treatments on model decomposition model parameters. 
  - **Data**: NutNetNPK_OakLitterDecomp_ModelParameters.csv
  - **Metadata**: NutNetNPK_OakLitterDecomp_ModelParameters_Metadata.csv
  - **Code**: NutNetOakLitter_TreatmentResponses.R
