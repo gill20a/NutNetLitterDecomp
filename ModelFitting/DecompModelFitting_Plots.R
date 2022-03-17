@@ -1,10 +1,11 @@
-
 #Template to fit single, double, asymptotic, and weibull litter decomposition models to indiviudal plots
 
 #Open necessary libraries
 library(readr)
 library(stats4)
 library(bbmle)
+library(mltools)
+library(Metrics)
 
 #Download data file. Users will need to update link to reflect their own file path. 
 urlfile = "https://raw.githubusercontent.com/gill20a/NutNetLitterDecomp/master/ModelFitting/NutNet_OakLitterDecay_HarvestData.csv"
@@ -86,7 +87,7 @@ abline(v=(quantile(data[pick1,"CN_Ratio"], 0.975,na.rm=T)), col="seagreen3", lwd
 abline(v=(quantile(data[pick1,"CN_Ratio"], 0.025,na.rm=T)), col="seagreen3", lwd=3, lty=3)
 box()
 ################################################
-### Replace litter N values that fall outside CN ratio with NA by harvest
+### Replace litter N values that fall outside 95% CI CN ratio with NA by harvest
 Harvest1<-subset(data,data[, "Harvest_No"] == 1)
 Harvest1[, "Fin_N_Mass_g"][Harvest1[, "CN_Ratio"] > (quantile(Harvest1[,"CN_Ratio"], 0.975,na.rm=T))] <- NA
 Harvest1[, "Fin_N_Mass_g"][Harvest1[, "CN_Ratio"] < (quantile(Harvest1[,"CN_Ratio"], 0.025,na.rm=T))] <- NA
@@ -111,11 +112,8 @@ Harvest7[, "Fin_N_Mass_g"][Harvest7[, "CN_Ratio"] < (quantile(Harvest7[,"CN_Rati
 
 data<-rbind(Harvest1, Harvest2, Harvest3,Harvest4, Harvest5, Harvest6, Harvest7)
 
-
-unique(data$Site_Text)
-class(data$Site_Text)
 data$Site_Text<-as.character(data$Site_Text)
-unique(data$Trt)
+
 CBGB<-data[data$Site_Text=="CBGB-Iowa",] #1-10
 Sierra<-data[data$Site_Text=="Sierra Foothill REC ",] #11-20
 Bunch<-data[data$Site_Text=="Bunchgrass - Andrews LTER ",] #21-30
@@ -160,6 +158,10 @@ Nmodel=array(0,dim=c(1000,2))
 
 #array to store RMSE output
 rmse=array(0,dim=c(1000,4)) 
+
+length.array = array(0,dim=c(1000,1)) 
+N.length.array = array(0,dim=c(1000,1)) 
+
 
 #Here, models are fit one at a time. You could make this a loop if you 
 #are convinced all your models will converge using the same starting values.
@@ -218,32 +220,25 @@ LLD = function(y,ks,k,A){
 }
 
 
+#Here, models are fit one at a time. You could make this a loop if you 
+#are convinced all your models will converge using the same starting values.
+#I never have such luck.
+
+#choose rep or set of CBGB points to fit (here identified by the CBGB column ID)
+
 ##CBGB######################################################################################################
 unique(CBGB$Plot)
 i<-1
 s1=subset(CBGB,CBGB$Plot==1)
 t=(as.numeric(s1$Yrs_Since_Deployment))
-class(t)
 t1<-seq(0,7,length.out=10000)
 Mt=s1$Prop_Init_C_Mass
-class(Mt)
 x <- data.frame(t, Mt)
-#omit lines with missing CBGB (NAs)
-# x<-x[order(x$t),]
 x[3,] <- NA
-xNA<-na.exclude(x)
-xNA
+xNA<- na.exclude(x)
 Mt<-xNA$Mt
 t<-xNA$t
-
-# fita<-lm(log(xNA$Mt)~xNA$t)
-# plot(xNA$t,log(xNA$Mt))
-# abline(fita, col="grey")
-# cooksd<-cooks.distance(fita)
-# plot(cooks.distance(fita), ylim=c(0,2), xlim=c(0,10))
-# abline(h=4*mean(cooks.distance(fita)), col="red")
-# abline(h=1, col="grey", lty=2)
-# text(x=1:length(cooksd)+.5, y=cooksd, labels=((x$t)), col="blue") # add labels
+length.array[i,1] = length(t)
 
 #Weibull function
 fit<- nls((Mt) ~ exp(-(t/beta)^alpha), start =list(beta=1, alpha = .81), algorithm="port", lower=c(0.0001,0.0001))
@@ -265,10 +260,7 @@ singleLL = mle2(minuslogl = LLS, start = list(k = 0.5), data = list(y=Mt),method
 #add 1 to K (in AIC caculation) for estimating sigma
 attr(singleLL ,"df") = attr(singleLL,"df")+1
 summary(singleLL)
-
 ssq = sum(((1*exp(-single.k[i,1]*xNA$t)) - xNA$Mt)^2)
-
-
 #Extract k value
 single.k[i,1]=coef(singleLL)[1]
 single.k[i,2]<-sum(((1*exp(-single.k[i,1]*xNA$t)) - xNA$Mt)^2)/length(xNA$t[!is.na(xNA$t)])
@@ -283,13 +275,6 @@ summary(asymLL)
 asymptotic.k[i,1]=coef(asymLL)[1]
 asymptotic.k[i,2]=coef(asymLL)[2]
 asymptotic.k.fit<-asymptotic.k[i,2]+((1-asymptotic.k[i,2])*exp(-asymptotic.k[i,1]*t1))
-
-#Asymptotic preds
-if(i==1){predmle2.a=asymptotic.k[i,2]+(1-asymptotic.k[i,2])*exp(-asymptotic.k[i,1]*x[,1])}
-if(i>1){
-  predmle2temp=asymptotic.k[i,2]+(1-asymptotic.k[i,2])*exp(-asymptotic.k[i,1]*x[,1])
-  predmle2.a=append(predmle2.a,predmle2temp)
-}
 
 
 #SummaryCBGB
@@ -316,7 +301,7 @@ Nt=s1$Fin_N_Mass_g
 if (length(which(!is.na(Nt)))< 4) {
   Nt<-rep(NA, length(Nt))
 }
-
+N.length.array[i,1] = sum(!is.na(Nt))
 
 plot(t, Nt, xlim=c(0,7))
 Time <- (as.numeric(s1$Yrs_Since_Deployment))
@@ -329,7 +314,6 @@ Nmat<-as.data.frame(cbind(timevalues, predictedcounts))
 Nmodel[i,1]<-Nmat[Nmat$predictedcounts == max(Nmat$predictedcounts), "timevalues"]
 Nmodel[i,2]<-max(Nmat$predictedcounts)
 
-
 xNA$single.predict<-exp(-single.k[i,1]*xNA$t) #For figure
 rmse[i,1]<-rmse(xNA$single.predict, Mt)
 xNA$asymp.predict<-asymptotic.k[i,2]+((1-asymptotic.k[i,2])*exp(-asymptotic.k[i,1]*xNA$t)) #For figure
@@ -337,6 +321,7 @@ rmse[i,2]<-rmse(xNA$asymp.predict, Mt)
 xNA$weibull.predict<-exp(-(xNA$t/weibull[i,2])^weibull[i,1])
 rmse[i,4]<-rmse(xNA$weibull.predict, Mt)
 
+#########
 colnames(a.aicc)<-c("Single_dAICc", "Asym_dAICc", "Double_dAICc", "Single_weight", "Asym_weight", "Double_Weight", "Single_AICc", 
                     "Asym_AICc", "Double_AICc", "weibull.AIC")
 
@@ -355,4 +340,3 @@ write.csv(a.aicc, "20210114_Plot_a.aicc_table.csv")
 write.csv(k_vals, "20210114_Plot_k_vals_table.csv")
 write.csv(rmse, "20210114_RMSE.csv")
 write.csv(Nmodel, "20210123_Nmodel.csv")
-
